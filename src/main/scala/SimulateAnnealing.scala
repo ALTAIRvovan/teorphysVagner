@@ -4,16 +4,18 @@
 class SimulateAnnealing(F: (VagnerCoefficients) => Double) {
 
     def decreaseTemperature( initialTemperature: Double, i : Int): Double = {
-        initialTemperature * 0.1 / i
+        initialTemperature / i
     }
 
+    def decreaseTemperature2(T: Double): Double = T * 0.99
+
     def getTransitionProbability( dE: Double, T: Double): Double = {
-        math.exp(-dE / T)
+        math.exp(-math.abs(dE) / T)
     }
 
     def isTransition(propobility: Double): Boolean = {
         val value = math.random
-        if(value <= propobility)
+        if(value < propobility)
             true
         else
             false
@@ -30,25 +32,25 @@ class SimulateAnnealing(F: (VagnerCoefficients) => Double) {
     }
 
     def solve(coef: VagnerCoefficients, initialTemperature: Double, endTemperature: Double): VagnerCoefficients = {
-        var currentCoef = coef
-        var currentEnergy = F(coef)
+        var currentCoef:VagnerCoefficients = coef
+        var currentEnergy:Double = F(coef)
         var T:Double = initialTemperature
-        for (i <- 1 to 1000000 if T > endTemperature) {
-            val condidateCoef = getNextCoefficients(currentCoef, T)
-            val condidateEnergy = F(condidateCoef)
+        while (T > endTemperature) {
+            val condidateCoef:VagnerCoefficients = getNextCoefficients(currentCoef, T)
+            val condidateEnergy:Double = F(condidateCoef)
             //println(condidateEnergy)
             if(condidateEnergy > currentEnergy) {
                 currentEnergy = condidateEnergy
                 currentCoef = condidateCoef
             } else {
                 val p = getTransitionProbability(currentEnergy - condidateEnergy, T)
-                //println("p=" + p, "T=" + T, "dE=" + (currentEnergy - condidateEnergy))
+                //println("p=" + p, "T=" + T, "dE=" + (currentEnergy - condidateEnergy).toDouble)
                 if(isTransition(p)) {
                     currentEnergy = condidateEnergy
                     currentCoef = condidateCoef
                 }
             }
-            T = decreaseTemperature(initialTemperature, i)
+            T = decreaseTemperature2(T)
         }
         currentCoef
     }

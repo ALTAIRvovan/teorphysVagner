@@ -10,7 +10,7 @@ object MainObject {
     val max_kr_mark1 = 50
 
     val sem_marks2part =  List(7, 0, 4, 1, 3, 1, 0, 0, 0, 2, 0, 2, 4, 3, 3, 5, 3, 0,   2, 0, 0, 1, 0, 0, 1, 0, 0,  0, 0, 0, 0).toArray
-    val task_marks2part = List(2, 2, 8, 2, 4, 3, 0, 0, 0, 4, 0, 1, 2, 4, 4, 3, 5, 0,   2, 4, 0, 5, 0, 1, 7, 3, 3,  9, 2, 2, 10).toArray
+    val task_marks2part = List(2, 2, 8, 2, 4, 3, 0, 0, 0, 4, 6, 1, 2, 4, 4, 3, 5, 0,   2, 4, 0, 5, 0, 1, 7, 3, 3,  9, 2, 2, 10).toArray
     val kr_marks2part =   List(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,   0, 0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0).toArray
     val max_mark2part = 62
     val max_kr_mark2 = 50
@@ -18,11 +18,11 @@ object MainObject {
     //Количество студентов (надеюсь, что размеры всех массивов одинаковы)
     val QoS = sem_marks1part.length
 
-    var k_sem1 = 1 //Коэффициент для баллов за семинары по первому заданию
-    var k_sem2 = 2 // --//-- по второму заданию
-    var k_semTotal = 3
-    var k_kr = 4
-    var k_com = 5 // Итоговый коэффициент
+    var k_sem1 = 0.01 //Коэффициент для баллов за семинары по первому заданию
+    var k_sem2 = 1.3 // --//-- по второму заданию
+    var k_semTotal = 10
+    var k_kr = 10
+    var k_com = 10 // Итоговый коэффициент
 
 
     var ac42: Double = - 1
@@ -89,6 +89,12 @@ object MainObject {
         var average:Double = 0
         var mul: Double = 1
         val marks = calcMarks(coef)
+
+        var upper = 0
+        var down = 0
+        marks.foreach((i: Int) => upper += i)
+        upper
+        /*
         for(i <- marks ) {
             average += i.toDouble / QoS
         }
@@ -97,18 +103,30 @@ object MainObject {
             disp += math.pow(i - average, 2) / QoS
         }
         marks.max / disp
+        */
     }
 
     def main(args: Array[String]): Unit ={
         val sym = new SimulateAnnealing(F)
-        val coef = sym.solve(new VagnerCoefficients(k_sem1, k_sem2, k_semTotal, k_kr, k_com), 100, 1e-5)
-        println(coef)
-        println("F=" + F(coef))
-        val marks = calcMarks(coef)
-        println("Оценки:")
-        marks.foreach(println)
-        //(0 until QoS).foreach((i: Int) => println(calcFinalRating(i, coef)))
-        //println("max_rating:" + calcMaxRating(coef))
+        val vag = new VagnerCoefficients(k_sem1, k_sem2, k_semTotal, k_kr, k_com)
+        var count = 3
+        for(j <- 0 to 10000 if count > 0) {
+            val coef = sym.solve(vag, 1000, 1e-7)
+            val F1 = F(coef)
+            val F2 =  F(vag)
+            if(F1 > F2) {
+                count -= 1
+                println(coef)
+                println("F1=" + F1)
+                println("F2=" + F2)
+                val marks = calcMarks(coef)
+                println("Оценки:")
+                marks.foreach(println)
+                println("Рейтинг")
+                (0 until QoS).foreach((i: Int) => println(calcFinalRating(i, coef)))
+                println("max_rating:" + calcMaxRating(coef))
+            }
+        }
         //println(ac42, ad42)
     }
 
