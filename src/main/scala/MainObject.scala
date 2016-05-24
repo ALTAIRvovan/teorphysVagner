@@ -105,9 +105,10 @@ object MainObject {
         println(coef)
         println("F=" + F(coef))
         val marks = calcMarks(coef)
+        println("Оценки:")
         marks.foreach(println)
-        (0 until QoS).foreach((i: Int) => println(calcFinalRating(i, coef)))
-        println("max_rating:" + calcMaxRating(coef))
+        //(0 until QoS).foreach((i: Int) => println(calcFinalRating(i, coef)))
+        //println("max_rating:" + calcMaxRating(coef))
         //println(ac42, ad42)
     }
 
